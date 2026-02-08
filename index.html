@@ -1,51 +1,249 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <link rel="manifest" href="manifest.json">
-    <script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Aleksander</title>
+    <title>Neon Calc - Aleksander</title>
+    <link rel="manifest" href="manifest.json">
+    <script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");</script>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #121212; margin: 0; }
-        .calc { background: #1e1e1e; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 300px; }
-        #display { width: 100%; height: 60px; font-size: 32px; text-align: right; margin-bottom: 20px; background: none; border: none; color: white; outline: none; }
-        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        button { padding: 20px; font-size: 20px; border: none; border-radius: 10px; cursor: pointer; background: #333; color: white; transition: 0.2s; }
-        button:active { transform: scale(0.95); background: #444; }
-        .op { background: #f39c12; }
-        .equal { background: #27ae60; grid-column: span 2; }
-        .clear { background: #c0392b; grid-column: span 2; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
+
+        body {
+            background-color: #0a0a0f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .calc-body {
+            background: #1a1a2e;
+            width: 320px;
+            padding: 25px;
+            border-radius: 40px;
+            border: 4px solid #16213e;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.1), inset 0 0 20px rgba(255, 0, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Neon Circuit Lines Mockup */
+        .calc-body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                linear-gradient(90deg, rgba(0,255,255,0.05) 1px, transparent 1px) 0 0 / 20px 20px,
+                linear-gradient(rgba(255,0,255,0.05) 1px, transparent 1px) 0 0 / 20px 20px;
+            pointer-events: none;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .brand {
+            color: #00f2ff;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.1;
+            text-shadow: 0 0 5px #00f2ff;
+        }
+
+        .solar-panel {
+            width: 80px;
+            height: 25px;
+            background: #3d2b1f;
+            border: 2px solid #1a1a1a;
+            border-radius: 4px;
+        }
+
+        .screen-container {
+            background: #8b9d83; /* Old LCD color */
+            border: 10px solid #16213e;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        #display {
+            width: 100%;
+            height: 60px;
+            background: transparent;
+            border: none;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 36px;
+            text-align: right;
+            padding: 10px;
+            box-sizing: border-box;
+            color: #1a1a1a;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            height: 50px;
+            border-radius: 12px;
+            border: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px #0f3460, 0 6px 10px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        button:active {
+            box-shadow: 0 1px #0f3460;
+            transform: translateY(3px);
+        }
+
+        .btn-grey { background: #e0e0e0; color: #1a1a2e; box-shadow: 0 4px #a0a0a0; }
+        .btn-blue { background: #0f3460; }
+        .btn-red { background: #e94560; box-shadow: 0 4px #951b2f; }
+        
+        .btn-plus {
+            grid-row: span 2;
+            height: 112px;
+            background: #0f3460;
+        }
+
+        .btn-zero {
+            background: #e0e0e0;
+            color: #1a1a2e;
+            box-shadow: 0 4px #a0a0a0;
+        }
+
+        .label-on {
+            color: #e94560;
+            font-size: 10px;
+            grid-column: 1;
+            text-align: left;
+            margin-bottom: -8px;
+        }
     </style>
 </head>
 <body>
-    <div class="calc">
-        <input type="text" id="display" readonly value="0">
-        <div class="buttons">
-            <button class="clear" onclick="clearD()">C</button>
-            <button class="op" onclick="add('/')">/</button>
-            <button class="op" onclick="add('*')">×</button>
-            <button onclick="add('7')">7</button>
-            <button onclick="add('8')">8</button>
-            <button onclick="add('9')">9</button>
-            <button class="op" onclick="add('-')">-</button>
-            <button onclick="add('4')">4</button>
-            <button onclick="add('5')">5</button>
-            <button onclick="add('6')">6</button>
-            <button class="op" onclick="add('+')">+</button>
-            <button onclick="add('1')">1</button>
-            <button onclick="add('2')">2</button>
-            <button onclick="add('3')">3</button>
-            <button onclick="calculate()" class="equal">=</button>
-            <button onclick="add('0')" style="grid-column: span 2;">0</button>
-            <button onclick="add('.')">.</button>
+    <div class="calc-body">
+        <div class="header">
+            <div class="brand">NEON<br>CALC</div>
+            <div class="solar-panel"></div>
+        </div>
+
+        <div class="screen-container">
+            <input type="text" id="display" readonly value="0">
+        </div>
+
+        <div class="grid">
+            <div class="label-on">ON</div><div></div><div></div><div></div>
+            
+            <button class="btn-red" onclick="clearAll()">C/CE</button>
+            <button class="btn-blue" onclick="off()">OFF</button>
+            <button class="btn-blue" onclick="sqrt()">&radic;</button>
+            <button class="btn-blue" onclick="percent()">%</button>
+
+            <button class="btn-blue" onclick="memRecall()">MRC</button>
+            <button class="btn-blue" onclick="memMinus()">M-</button>
+            <button class="btn-blue" onclick="memPlus()">M+</button>
+            <button class="btn-blue" onclick="append('/')">&divide;</button>
+
+            <button class="btn-grey" onclick="append('7')">7</button>
+            <button class="btn-grey" onclick="append('8')">8</button>
+            <button class="btn-grey" onclick="append('9')">9</button>
+            <button class="btn-blue" onclick="append('*')">&times;</button>
+
+            <button class="btn-grey" onclick="append('4')">4</button>
+            <button class="btn-grey" onclick="append('5')">5</button>
+            <button class="btn-grey" onclick="append('6')">6</button>
+            <button class="btn-blue" onclick="append('-')">-</button>
+
+            <button class="btn-grey" onclick="append('1')">1</button>
+            <button class="btn-grey" onclick="append('2')">2</button>
+            <button class="btn-grey" onclick="append('3')">3</button>
+            <button class="btn-plus" onclick="append('+')">+</button>
+
+            <button class="btn-zero" onclick="append('0')">0</button>
+            <button class="btn-grey" onclick="append('.')">.</button>
+            <button class="btn-blue" onclick="calculate()">=</button>
         </div>
     </div>
+
     <script>
-        let disp = document.getElementById('display');
-        function add(v) { if(disp.value === '0') disp.value = v; else disp.value += v; }
-        function clearD() { disp.value = '0'; }
-        function calculate() { try { disp.value = eval(disp.value); } catch { disp.value = 'Błąd'; } }
+        let display = document.getElementById('display');
+        let memory = 0;
+        let isOff = false;
+
+        function append(char) {
+            if (isOff) return;
+            if (display.value === '0' && char !== '.') {
+                display.value = char;
+            } else {
+                display.value += char;
+            }
+        }
+
+        function clearAll() {
+            isOff = false;
+            display.style.opacity = "1";
+            display.value = '0';
+        }
+
+        function calculate() {
+            if (isOff) return;
+            try {
+                // Replacement for eval to handle basic math safely
+                display.value = eval(display.value.replace('×', '*').replace('÷', '/'));
+            } catch {
+                display.value = 'Error';
+            }
+        }
+
+        function sqrt() {
+            if (isOff) return;
+            display.value = Math.sqrt(eval(display.value));
+        }
+
+        function percent() {
+            if (isOff) return;
+            display.value = eval(display.value) / 100;
+        }
+
+        function off() {
+            isOff = true;
+            display.value = "";
+            display.style.opacity = "0.1";
+        }
+
+        function memPlus() {
+            if (isOff) return;
+            memory += parseFloat(display.value || 0);
+            display.value = '0';
+        }
+
+        function memMinus() {
+            if (isOff) return;
+            memory -= parseFloat(display.value || 0);
+            display.value = '0';
+        }
+
+        function memRecall() {
+            if (isOff) return;
+            display.value = memory;
+        }
     </script>
 </body>
 </html>
