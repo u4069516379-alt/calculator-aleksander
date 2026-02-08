@@ -186,6 +186,7 @@
         let display = document.getElementById('display');
         let memory = 0;
         let isOff = false;
+        let lastClearTime = 0;
 
         function append(char) {
             if (isOff) return;
@@ -199,7 +200,16 @@
         function clearAll() {
             isOff = false;
             display.style.opacity = "1";
-            display.value = '0';
+            
+            const now = Date.now();
+            if (now - lastClearTime < 500) { // Double click detected (within 500ms)
+                memory = 0;
+                display.value = "MEM CLR";
+                setTimeout(() => { display.value = '0'; }, 800);
+            } else {
+                display.value = '0';
+            }
+            lastClearTime = now;
         }
 
         function calculate() {
