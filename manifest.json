@@ -1,0 +1,15 @@
+{
+  "name": "Kalkulator Aleksander",
+  "short_name": "Kalkulator",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#27ae60",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
